@@ -15,18 +15,12 @@ import {
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-const data = {
-  isOnline: true,
-  imageURL: "http://www.caurn.org.br/wp-content/uploads/2017/03/IMG_7320.jpg",
-  idade: "19 anos",
-};
-
 interface Accompanhante {
   id: number;
   isOnline: boolean;
-  imageURL: string;
-  idade: string;
-  nome: string;
+  urlPhoto: string;
+  age: string;
+  name: string;
 }
 
 const HomePage = () => {
@@ -36,7 +30,7 @@ const HomePage = () => {
   useEffect(() => {
     async function fetchAcompanhantes() {
       try {
-        const response = await api.get("/escort/acompanhante");
+        const response = await api.get("/");
         setAcompanhantes(response.data);
       } catch (error) {
         console.log(error);
@@ -67,7 +61,7 @@ const HomePage = () => {
                   shadow="lg"
                   position="relative"
                 >
-                  {data.isOnline && (
+                  {acompanhante.isOnline && (
                     <>
                       <Text style={{ margin: "0 0 0 20px" }}>Online</Text>
                       <Circle
@@ -80,7 +74,7 @@ const HomePage = () => {
                     </>
                   )}
                   <Image
-                    src={acompanhante.imageURL}
+                    src={acompanhante.urlPhoto}
                     alt={"acompanhante"}
                     roundedTop="lg"
                   />
@@ -93,7 +87,7 @@ const HomePage = () => {
                           fontSize="0.8em"
                           colorScheme="red"
                         >
-                          {acompanhante.nome}
+                          {acompanhante.name}
                         </Badge>
                     </Box>
                     <Flex
@@ -108,7 +102,7 @@ const HomePage = () => {
                         lineHeight="tight"
                         isTruncated
                       >
-                        {data.idade}
+                        {acompanhante.age}
                       </Box>
                     </Flex>
                     <Flex justifyContent="space-between" alignContent="center">
