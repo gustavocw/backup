@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Client" ALTER COLUMN "codeDate" SET DATA TYPE TEXT;
+
+-- AlterTable
+ALTER TABLE "Escort" ALTER COLUMN "codeDate" SET DATA TYPE TEXT;

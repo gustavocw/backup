@@ -1,0 +1,69 @@
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-1.1.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Client {
+  id String @id @default(uuid())
+
+  email    String  @unique
+  password String
+  escort   Boolean @default(false)
+  code     Int?
+  codeDate Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Escort {
+  id String @id @default(uuid())
+
+  name     String
+  email    String  @unique
+  password String
+  sexo     String
+  city     String
+  escort   Boolean @default(true)
+  code     Int?
+  codeDate Int?
+
+  dataEscort   DataOfEscort[]
+  imagesEscort ImagesForEscort[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DataOfEscort {
+  id String @id @default(uuid())
+
+  price         String
+  description   String
+  contact       String @unique
+  type          String
+  eyes          String
+  tatoo         Int
+  piercing      Int
+  weight        String
+  height        String
+  obsScheduling String
+  age           Int
+
+  escort   Escort @relation(fields: [clientId], references: [id])
+  clientId String
+}
+
+model ImagesForEscort {
+  id String @id @default(uuid())
+
+  urlPhoto String
+
+  escort   Escort @relation(fields: [escortId], references: [id])
+  escortId String
+}

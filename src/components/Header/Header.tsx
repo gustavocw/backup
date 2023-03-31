@@ -12,7 +12,7 @@ import {
   Stack,
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon } from "@chakra-ui/icons";
-import LoginDialogUser from "../LoginDialog/LoginUser";
+import LoginDialogUser from "../RegisterDialog/RegisterUser";
 
 const Links = ["Início"];
 

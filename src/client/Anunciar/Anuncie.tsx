@@ -1,7 +1,7 @@
 import "./style/anuncie.css";
 import Footer from "../../components/Footer/Footer";
 import Header from "../../components/Header/Header";
-import api from "../../services/api"
+import api from "../../services/api";
 import {
   Button,
   Flex,
@@ -12,55 +12,107 @@ import {
   Stack,
   useColorModeValue,
   Center,
-  useDisclosure,
   Textarea,
-  Select,
+  useToast,
 } from "@chakra-ui/react";
 import { useState } from "react";
+import RegisterDialogUser from "../../components/RegisterDialog/RegisterUser";
 import LoginDialogUser from "../../components/LoginDialog/LoginUser";
+import Cookies from "js-cookie";
 
 export default function AnunciePage(): JSX.Element {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [imageSrc, setImageSrc] = useState("");
-  const [answer, setAnswer] = useState("");
+  const [price, setPrice] = useState("");
+  const [description, setDescription] = useState("");
+  const [contact, setContact] = useState("");
+  const [type, setType] = useState("");
+  const [eyes, setEyes] = useState("");
+  const [tatoo, setTatoo] = useState("");
+  const [piercing, setPiercing] = useState("");
+  const [weight, setWeight] = useState("");
+  const [age, setAge] = useState("");
+  const [height, setHeight] = useState("");
+  const [obsScheduling, setObsScheduling] = useState("");
+  const toast = useToast();
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files && e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setImageSrc(event.target?.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const DEFAULT_IMAGE_SRC = "https://via.placeholder.com/450";
-
-  const h = () => {
-    setAnswer("homem");
-  };
-  const m = () => {
-    setAnswer("mulher");
-  };
-  const t = () => {
-    setAnswer("trans");
-  };
-  const c = () => {
-    setAnswer("casal");
-  };
-
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    try {
-      const response = await api.post("/escort/create", {
+  const handleSubmit = () => {
+    api
+      .post(
+        "/description/create",
+        {
+          price,
+          description,
+          contact,
+          type,
+          eyes,
+          tatoo,
+          piercing,
+          weight,
+          age,
+          height,
+          obsScheduling,
+        },
+        {}
+      )
+      .then((response) => {
+        const token = response.data.token;
+        if (token) {
+          Cookies.set("token", token, { expires: 1 });
+        } else {
+          toast({
+            title: "Falha no registro",
+            description: "Digite um email e senha válidos.",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+          });
+        }
+      })
+      .catch((error) => {
+        toast({
+          title: "Falha no registro",
+          description: "Digite um email e senha válidos.",
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
       });
-      console.log(response);
-    } catch (error) {
-      console.error(error);
-    }
   };
+
+  const [image, setImage] = useState<File | undefined>(undefined);
+  const token = Cookies.get('token');
+
+  function handle_image() {
+    if (!image) {
+      toast({
+        title: "Nenhuma imagem selecionada",
+        status: "warning",
+        duration: 3000,
+        isClosable: true,
+      });
+      return;
+    }
+
+    const data = new FormData();
+    data.append("file", image);
+    api
+      .post(`/upload/images`, data, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+      })
+      .then((response) => {
+        const token = response.data.token;
+        if (token) {
+          console.log('AEEEEEEEEEEE')
+        } else {
+          console.log('PORRA Q KRL')
+        }
+      })
+      .catch((e) => {
+        console.log("Erro! -> ", e);
+      });
+  }
 
   return (
     <div className="container">
@@ -82,19 +134,18 @@ export default function AnunciePage(): JSX.Element {
               <FormControl id="userName">
                 <Stack direction={["column"]} spacing={6}>
                   <Center>
-                    <img src={imageSrc || DEFAULT_IMAGE_SRC} alt="imagem" />
+                    <img src="s" alt="imagem" />
                   </Center>
                   <Center>
                     <Input
-                      type={"file"}
-                      placeholder="Digite o texto personalizado aqui"
-                      multiple
-                      onChange={handleImageChange}
+                      onChange={(e) => setImage(e.target.files?.[0])}
+                      type="file"
+                      name=""
+                      id=""
                     />
                   </Center>
-                  <FormLabel>Fale um pouco de sí (*)</FormLabel>
                   <Center>
-                    <Textarea />
+                    <Button onClick={handle_image}>Enviar imagens</Button>
                   </Center>
                 </Stack>
               </FormControl>
@@ -107,86 +158,37 @@ export default function AnunciePage(): JSX.Element {
               rounded={"xl"}
               p="12"
             >
+              <FormLabel>Fale um pouco de sí (*)</FormLabel>
               <Center>
-                <Button
-                  bg={"pink.500"}
-                  color={"#fff"}
-                  size={"sm"}
-                  onClick={h}
-                  isLoading={answer === "homem"}
-                  px={"2"}
-                  mx={"1"}
-                >
-                  homem
-                </Button>
-                <Button
-                  bg={"pink.500"}
-                  color={"#fff"}
-                  size={"sm"}
-                  onClick={m}
-                  isLoading={answer === "mulher"}
-                  px={"2"}
-                  mx={"1"}
-                >
-                  mulher
-                </Button>
-                <Button
-                  bg={"pink.500"}
-                  color={"#fff"}
-                  size={"sm"}
-                  onClick={t}
-                  isLoading={answer === "trans"}
-                  px={"2"}
-                  mx={"1"}
-                >
-                  TRANS
-                </Button>
-                <Button
-                  bg={"pink.500"}
-                  color={"#fff"}
-                  size={"sm"}
-                  onClick={c}
-                  isLoading={answer === "casal"}
-                  px={"2"}
-                  mx={"1"}
-                >
-                  casal
-                </Button>
+                <Textarea
+                  value={description}
+                  onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                    setDescription(e.target.value)
+                  }
+                />
               </Center>
-              <FormControl id="userName" isRequired>
-                <Select placeholder="Localização">
-                  <option value="Aveiro">Aveiro</option>
-                  <option value="Bragança">Bragança</option>
-                  <option value="Castelo Branco">Castelo Branco</option>
-                  <option value="Coimbra">Coimbra</option>
-                  <option value="Évora">Évora</option>
-                  <option value="Faro">Faro</option>
-                  <option value="Guarda">Guarda</option>
-                  <option value="Leiria">Leiria</option>
-                  <option value="Braga">Braga</option>
-                  <option value="Portalegre">Portalegre</option>
-                  <option value="Porto">Porto</option>
-                  <option value="Santarém">Santarém</option>
-                  <option value="Setúbal">Setúbal</option>
-                  <option value="Viana do Castelo">Viana do Castelo</option>
-                  <option value="Vila Real">Vila Real</option>
-                  <option value="Viseu">Viseu</option>
-                </Select>
-              </FormControl>
               <FormControl id="idade" isRequired>
                 <FormLabel>Idade</FormLabel>
                 <Input
                   placeholder="19, 25..."
                   _placeholder={{ color: "gray.500" }}
                   type="tel"
+                  value={age}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setAge(e.target.value)
+                  }
                 />
               </FormControl>
               <FormControl id="userName" isRequired>
-                <FormLabel>Nome</FormLabel>
+                <FormLabel>Preço</FormLabel>
                 <Input
-                  placeholder="Nome"
+                  placeholder="Ex:€100"
                   _placeholder={{ color: "gray.500" }}
-                  type="text"
+                  type="number"
+                  value={price}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setPrice(e.target.value)
+                  }
                 />
               </FormControl>
               <FormControl id="password" isRequired>
@@ -195,6 +197,10 @@ export default function AnunciePage(): JSX.Element {
                   placeholder="Contacto"
                   _placeholder={{ color: "gray.500" }}
                   type="tel"
+                  value={contact}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setContact(e.target.value)
+                  }
                 />
               </FormControl>
               <FormControl id="userName" isRequired>
@@ -203,6 +209,10 @@ export default function AnunciePage(): JSX.Element {
                   placeholder="Loira, Morena..."
                   _placeholder={{ color: "gray.500" }}
                   type="text"
+                  value={type}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setType(e.target.value)
+                  }
                 />
               </FormControl>
               <FormControl id="olhos" isRequired>
@@ -211,6 +221,10 @@ export default function AnunciePage(): JSX.Element {
                   placeholder="Azuis, Castanhos..."
                   _placeholder={{ color: "gray.500" }}
                   type="text"
+                  value={eyes}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setEyes(e.target.value)
+                  }
                 />
               </FormControl>
             </Stack>
@@ -228,6 +242,10 @@ export default function AnunciePage(): JSX.Element {
                   placeholder="0, 1, 2..."
                   _placeholder={{ color: "gray.500" }}
                   type="tel"
+                  value={tatoo}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setTatoo(e.target.value)
+                  }
                 />
               </FormControl>
               <FormControl id="manequim" isRequired>
@@ -236,6 +254,10 @@ export default function AnunciePage(): JSX.Element {
                   placeholder="0, 1, 2..."
                   _placeholder={{ color: "gray.500" }}
                   type="tel"
+                  value={piercing}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setPiercing(e.target.value)
+                  }
                 />
               </FormControl>
               <FormControl id="altura" isRequired>
@@ -244,6 +266,10 @@ export default function AnunciePage(): JSX.Element {
                   placeholder="1,65..."
                   _placeholder={{ color: "gray.500" }}
                   type="tel"
+                  value={height}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setHeight(e.target.value)
+                  }
                 />
               </FormControl>
               <FormControl id="peso" isRequired>
@@ -252,6 +278,10 @@ export default function AnunciePage(): JSX.Element {
                   placeholder="58, 60kg..."
                   _placeholder={{ color: "gray.500" }}
                   type="tel"
+                  value={weight}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setWeight(e.target.value)
+                  }
                 />
               </FormControl>
               <FormControl id="peso" isRequired>
@@ -260,8 +290,16 @@ export default function AnunciePage(): JSX.Element {
                   placeholder="Ex: Ap 123, somente a noite..."
                   _placeholder={{ color: "gray.500" }}
                   type="tel"
+                  value={obsScheduling}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setObsScheduling(e.target.value)
+                  }
                 />
               </FormControl>
+              <RegisterDialogUser
+                isLoggedIn={isLoggedIn}
+                setIsLoggedIn={setIsLoggedIn}
+              />
               <LoginDialogUser
                 isLoggedIn={isLoggedIn}
                 setIsLoggedIn={setIsLoggedIn}
@@ -269,6 +307,7 @@ export default function AnunciePage(): JSX.Element {
               <Stack spacing={6} direction={["column", "row"]}>
                 {isLoggedIn && (
                   <Button
+                    onClick={handleSubmit}
                     disabled={!isLoggedIn}
                     bg={"pink.400"}
                     color={"white"}
